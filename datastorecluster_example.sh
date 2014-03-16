@@ -50,9 +50,9 @@ use Data::Dumper;
 use vEasy::Connect;
 
 my %opts = (
-	foldername => { type => "=s", required => 1 },
-	poolname => { type => "=s", required => 1 },
-	dsname => { type => "=s", required => 1 },
+	dscname => { type => "=s", required => 1 },
+	# poolname => { type => "=s", required => 1 },
+	# dsname => { type => "=s", required => 1 },
 );
 Opts::add_options(%opts);
 
@@ -62,9 +62,9 @@ my $server = Opts::get_option("server");
 my $username = Opts::get_option("username");
 my $password = Opts::get_option("password");
 
-my $foldername = Opts::get_option("foldername");
-my $poolname = Opts::get_option("poolname");
-my $dsname = Opts::get_option("dsname");
+my $dscname = Opts::get_option("dscname");
+# my $poolname = Opts::get_option("poolname");
+# my $dsname = Opts::get_option("dsname");
 
 
 my $vim = vEasy::Connect->new($server, $username, $password);
@@ -75,51 +75,38 @@ if( $vim )
 	print "Connected to server: $server\n";
 	
 	# Get Entity
-	my $folder = vEasy::Folder->new($vim, $foldername);
-	if( $folder )
+	my $dsc = vEasy::DatastoreCluster->new($vim, $dscname);
+	if( $dsc )
 	{
-		print "Creating subfolder...\n";
-		my $subfolder = $folder->createFolder("SubFolder");
-		if( not $subfolder )
+		print "NAME: ".$dsc->name."\n";
+		print "Total capacity: ".$dsc->getTotalCapacity()." MB\n";
+		print "Free capacity: ".$dsc->getFreeCapacity()." MB\n";
+		print "Used capacity: ".$dsc->getUsedCapacity()." MB\n";
+		print "SpaceUtilizationThreshold: ".$dsc->getSpaceUtilizationThreshold()."\n";
+		print "MinimumSpaceUtilizationDifference: ".$dsc->getMinimumSpaceUtilizationDifference()."\n";
+		print "IoLatencyThreshold: ".$dsc->getIoLatencyThreshold()."\n";
+		print "IoLoadImbalanceThreshold: ".$dsc->getIoLoadImbalanceThreshold()."\n";
+		print "StoragDRS enabled?: ".$dsc->isStorageDrsEnabled()."\n";
+		print "IO load balancing enabled?: ".$dsc->isIoLoadBalancingEnabled()."\n";
+		print "StorageDrsAutomationLevel: ".$dsc->getStorageDrsAutomationLevel()."\n";
+
+		my $task = $dsc->enableStorageDrs();
+		if( not $task )
 		{
-			print $folder->getLatestFault()->getType()." ".$folder->getLatestFault()->getMessage()."\n";
+			print $dsc->getLatestFaultMessage()."\n";
 		}
-		print "Trying to create a datacenter...\n";
-		my $dc = $folder->createDatacenter("DC");
-		if( not $dc )
-		{
-			print $folder->getLatestFault()->getType()." ".$folder->getLatestFault()->getMessage()."\n";
-		}
-		print "Trying to create a cluster...\n";
-		my $cluster = $folder->createCluster("Cluster2");
-		if( not $cluster )
-		{
-			print $folder->getLatestFault()->getType()." ".$folder->getLatestFault()->getMessage()."\n";
-		}
-		
-		my $rp = vEasy::ResourcePool->new($vim, $poolname);
-		my $ds = vEasy::Datastore->new($vim, $dsname);
-		
-		print "Trying to create a VirtualMachine...\n";
-		my $vm = $folder->createVirtualMachine("vm", $rp, $ds);
-		if( not $vm )
-		{
-			print $folder->getLatestFault()->getType()." ".$folder->getLatestFault()->getMessage()."\n";
-		}
-		
-		print "Trying to move cluster to subfolder...\n";
-		$subfolder->moveEntityToFolder($cluster);
-		
-		$folder->refresh();
-		
-		print "CHILD ENTITIES\n";
-		my $childs = $folder->getChildEntities();
-		
-		for(my $i = 0; $i < @$childs; ++$i)
-		{
-			print $childs->[$i]->getType()." ".$childs->[$i]->name()."\n";
-		}
-		$subfolder->remove();
+		$dsc->enableIoLoadBalancing();
+		$dsc->setStorageDrsAutomationLevelToAutomated();
+		$dsc->keepVirtualMachineDisksOnSameDatastore();
+		$dsc->setLoadBalanceInterval(9000);
+		$dsc->setMinimumSpaceUtilizationDifference(10);
+		$dsc->setSpaceUtilizationThreshold(80);
+		$dsc->setIoLatencyThreshold(100);
+		$dsc->setIoLoadImbalanceThreshold(24);
+
+		my $folder = vEasy::Folder->new($vim, "DatastoreFolder");
+		my $newdsc = $folder->createDatastoreCluster("NEWDSC");
+		$newdsc->remove();
 	}
 	else
 	{
