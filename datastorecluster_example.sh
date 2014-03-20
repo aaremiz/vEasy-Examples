@@ -51,8 +51,9 @@ use vEasy::Connect;
 
 my %opts = (
 	dscname => { type => "=s", required => 1 },
-	# poolname => { type => "=s", required => 1 },
-	# dsname => { type => "=s", required => 1 },
+	foldername => { type => "=s", required => 1 },
+	ds1name => { type => "=s", required => 1 },
+	ds2name => { type => "=s", required => 1 },
 );
 Opts::add_options(%opts);
 
@@ -63,9 +64,9 @@ my $username = Opts::get_option("username");
 my $password = Opts::get_option("password");
 
 my $dscname = Opts::get_option("dscname");
-# my $poolname = Opts::get_option("poolname");
-# my $dsname = Opts::get_option("dsname");
-
+my $foldername = Opts::get_option("foldername");
+my $ds1name = Opts::get_option("ds1name");
+my $ds2name = Opts::get_option("ds2name");
 
 my $vim = vEasy::Connect->new($server, $username, $password);
 
@@ -75,7 +76,8 @@ if( $vim )
 	print "Connected to server: $server\n";
 	
 	# Get Entity
-	my $dsc = vEasy::DatastoreCluster->new($vim, $dscname);
+	my $folder = vEasy::Folder->new($vim, $foldername);
+	my $dsc = $folder->createDatastoreCluster($dscname);
 	if( $dsc )
 	{
 		print "NAME: ".$dsc->name."\n";
@@ -90,11 +92,22 @@ if( $vim )
 		print "IO load balancing enabled?: ".$dsc->isIoLoadBalancingEnabled()."\n";
 		print "StorageDrsAutomationLevel: ".$dsc->getStorageDrsAutomationLevel()."\n";
 
+		my $ds1 = vEasy::Datastore->new($vim, $ds1name);
+		if( $ds1 )
+		{
+			$dsc->moveEntityToFolder($ds1);
+		}
+		my $ds2 = vEasy::Datastore->new($vim, $ds2name);
+		if( $ds2 )
+		{
+			$dsc->moveEntityToFolder($ds2);
+		}
 		my $task = $dsc->enableStorageDrs();
 		if( not $task )
 		{
 			print $dsc->getLatestFaultMessage()."\n";
 		}
+		print "\n\nChanging settings: ...";
 		$dsc->enableIoLoadBalancing();
 		$dsc->setStorageDrsAutomationLevelToAutomated();
 		$dsc->keepVirtualMachineDisksOnSameDatastore();
@@ -103,10 +116,22 @@ if( $vim )
 		$dsc->setSpaceUtilizationThreshold(80);
 		$dsc->setIoLatencyThreshold(100);
 		$dsc->setIoLoadImbalanceThreshold(24);
-
-		my $folder = vEasy::Folder->new($vim, "DatastoreFolder");
-		my $newdsc = $folder->createDatastoreCluster("NEWDSC");
-		$newdsc->remove();
+		$dsc->refresh();
+		print "done\n\n";
+		
+		print "NAME: ".$dsc->name."\n";
+		print "Total capacity: ".$dsc->getTotalCapacity()." MB\n";
+		print "Free capacity: ".$dsc->getFreeCapacity()." MB\n";
+		print "Used capacity: ".$dsc->getUsedCapacity()." MB\n";
+		print "SpaceUtilizationThreshold: ".$dsc->getSpaceUtilizationThreshold()."\n";
+		print "MinimumSpaceUtilizationDifference: ".$dsc->getMinimumSpaceUtilizationDifference()."\n";
+		print "IoLatencyThreshold: ".$dsc->getIoLatencyThreshold()."\n";
+		print "IoLoadImbalanceThreshold: ".$dsc->getIoLoadImbalanceThreshold()."\n";
+		print "StoragDRS enabled?: ".$dsc->isStorageDrsEnabled()."\n";
+		print "IO load balancing enabled?: ".$dsc->isIoLoadBalancingEnabled()."\n";
+		print "StorageDrsAutomationLevel: ".$dsc->getStorageDrsAutomationLevel()."\n";
+		
+		#$dsc->remove();
 	}
 	else
 	{

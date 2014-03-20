@@ -39,9 +39,8 @@
 #
 # ====================================================================================
 
-
 sub BEGIN{
-	push @INC, "..";
+	push @INC, "../vEasy";
 }
 
 use strict;
@@ -50,7 +49,6 @@ use Data::Dumper;
 use vEasy::Connect;
 
 my %opts = (
-	vmname => { type => "=s", required => 1 },
 	clustername => { type => "=s", required => 1 },
 	poolname => { type => "=s", required => 1 },
 );

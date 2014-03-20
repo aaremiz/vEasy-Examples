@@ -40,7 +40,7 @@
 # ====================================================================================
 
 sub BEGIN{
-	push @INC, "..";
+	push @INC, "../vEasy";
 }
 
 use strict;
@@ -48,11 +48,19 @@ use warnings;
 use Data::Dumper;
 use vEasy::Connect;
 
+my %opts = (
+	host1 => { type => "=s", required => 1 },
+	host2 => { type => "=s", required => 1 },
+);
+Opts::add_options(%opts);
+
 Opts::parse();
 Opts::validate();
 my $server = Opts::get_option("server");
 my $username = Opts::get_option("username");
 my $password = Opts::get_option("password");
+my $host1name = Opts::get_option("host1");
+my $host2name = Opts::get_option("host2");
 
 my $vim = vEasy::Connect->new($server, $username, $password);
 
@@ -77,13 +85,13 @@ if( $vim )
 		}
 
 		# Add host
-		my $host1 = $cluster->addHost("myhost1.demo.local", "root", "mypasswd");
+		my $host1 = $cluster->addHost($host1name, "root", "vmware1");
 		if( $host1 )
 		{
 			print "Host added to cluster: ".$host1->name()."\n";
 			
 			# Add host
-			my $host2 = $cluster->addHost("myhost2.demo.local", "root", "mypasswd");		
+			my $host2 = $cluster->addHost($host2name, "root", "vmware1");		
 			if( $host2 )
 			{
 				print "Host added to cluster: ".$host2->name()."\n";

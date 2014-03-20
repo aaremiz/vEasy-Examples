@@ -40,7 +40,7 @@
 # ====================================================================================
 
 sub BEGIN{
-	push @INC, "..";
+	push @INC, "../vEasy";
 }
 
 use strict;
@@ -82,13 +82,6 @@ if( $vim )
 	if( $vm )
 	{
 		print "VM created\n";
-
-		print "Upgrading VirtualMachine HW version\n";
-		my $task = $vm->upgradeVirtualHardware();
-		if( not $task or $task->completedFailed() )
-		{
-			print $vm->getLatestFaultMessage()."\n";
-		}
 		
 		print "Setting vCPUs...\n";
 		$vm->setCpusAndCores(2,2);
@@ -99,9 +92,9 @@ if( $vim )
 		print "Setting Guest OS type...\n";
 		$vm->setGuestOperatingSystemType("rhel5Guest");
 		print "Adding some SCSI controllers...\n";
-		$vm->addSasScsiController(0);
-		$vm->addLsiLogicScsiController(1);
-		$vm->addBusLogicScsiController(2);
+		$vm->addSasScsiController(0)->waitToComplete();
+		$vm->addLsiLogicScsiController(1)->waitToComplete();
+		$vm->addBusLogicScsiController(2)->waitToComplete();
 		$vm->addParavirtualScsiController(3)->waitToComplete();
 
 		$vm->refresh();
@@ -166,7 +159,7 @@ if( $vim )
 		print "HW version: ".$vm->getVirtualHardwareVersion()."\n";
 		print "Guest type: ".$vm->getGuestOperatingSystemType()."\n";
 
-		$task = $vm->powerOn();
+		my $task = $vm->powerOn();
 		if( not $task->completedOk() )
 		{
 			print $vm->getLatestFault()->getMessage()."\n";
@@ -207,6 +200,12 @@ if( $vim )
 			print $task->getFaultMessage()."\n";
 		}
 
+		print "Upgrading VirtualMachine HW version\n";
+		$task = $vm->upgradeVirtualHardware();
+		if( not $task or $task->completedFailed() )
+		{
+			print $vm->getLatestFaultMessage()."\n";
+		}
 		
 		$vm->remove();
 	}
