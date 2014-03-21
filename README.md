@@ -1,7 +1,7 @@
 vEasy-Examples
 ==============
 
-This repository contains sample scripts how to use [vEasy Automation Framework](https://github.com/aaremiz/vEasy). Purpose of this example is only to demonstrate the usage of [vEasy Automation Framework](https://github.com/aaremiz/vEasy). The scripts does not do anything reasonable and 
+This repository contains sample scripts how to use [vEasy Automation Framework](https://github.com/aaremiz/vEasy). Purpose of this example is only to demonstrate the usage of [vEasy Automation Framework](https://github.com/aaremiz/vEasy). The sample scripts don't do anything reasonable and 
 should **NOT** be used in production systems. 
 
 License
