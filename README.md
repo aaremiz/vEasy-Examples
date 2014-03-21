@@ -1,13 +1,13 @@
 vEasy-Examples
 ==============
 
-This repository caontains sample scripts how to use vEasy Automation Framework. Purpose of this example is only to demonstrate the usage of vEasy Automation Framework. The scripts does not do anything reasonable and 
+This repository contains sample scripts how to use [vEasy Automation Framework](https://github.com/aaremiz/vEasy). Purpose of this example is only to demonstrate the usage of [vEasy Automation Framework](https://github.com/aaremiz/vEasy). The scripts does not do anything reasonable and 
 should **NOT** be used in production systems. 
 
 License
 -------
 
-vEasy is distributed under the terms of BSD 3-Clause License. See LICENSE file.
+[vEasy](https://github.com/aaremiz/vEasy) is distributed under the terms of BSD 3-Clause License. See LICENSE file.
 
 ```
 Copyright (c) 2014, Risto Mäntylä
