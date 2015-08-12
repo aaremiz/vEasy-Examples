@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# Copyright (c) 2014, Risto M‰ntyl‰
+# Copyright (c) 2014, Risto M√§ntyl√§
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification,
@@ -30,7 +30,7 @@
 
 
 # ====================================================================================
-# Author:	Risto M‰ntyl‰ 
+# Author:	Risto M√§ntyl√§ 
 #			aaremiz@gmail.com
 #
 # Purpose:	Purpose of this example is only to demonstrate the usage of vEasy 
